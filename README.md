@@ -68,8 +68,8 @@ remotes::install_github("robayed/bisonR")
 ## 3. Instructions for Use
 
 ### Data Organisation
-All data files are stored in the `data/` directory. The primary data source is the collated supplementary workbook:
-* `data/Supplementary_Tables.xlsx`: Contains all supplementary tables references in the main text. Table descriptions provided in the sheet 'Table Index'.
+The primary data source is the collated supplementary workbook:
+* `Supplementary_Tables.xlsx`: Contains all supplementary tables references in the main text. Table descriptions provided in the sheet 'Table Index'.
 * All animal identifiers have been replaced with unique four-letter anonymised codes. This preserves relational integrity across behavioural observations, dyadic networks, and pedigree records while maintaining privacy.
 
 ### Running the Analysis
@@ -79,15 +79,15 @@ All data files are stored in the `data/` directory. The primary data source is t
 setwd("path/to/SSB_delayed_fitness")
 ```
 
-2. Execute the self-contained R scripts in `scripts/` corresponding to each section of the manuscript:
+2. Execute the self-contained R scripts corresponding to each section of the manuscript:
 
 | Manuscript Section | Primary Script | Description and Outputs |
 | :--- | :--- | :--- |
-| **Immediate Reproductive Output** | `scripts/Male_annual_fitness_SSB_v1.2_publication_ready.R` | Multivariate GLMM assessing annual associations between SSB, DSB, and offspring sired; outputs parameter summaries and Figure 1 panels. |
-| **Dominance Rank Associations** | `scripts/Multivariate_Rank_SSB_DSB_v1.2_publication_ready.R` | Multivariate model evaluating age trajectories for SSB, DSB and dominance rank; generates Figure 2 panels. |
-| **Affiliative Male-Male Bonds** | `scripts/Social_network_analysis_publication_ready_v1.2.R` | BISoN edge-weight models and nodal regressions for grooming, coalition, and aggression networks; outputs network metrics and Figure 3a panel. |
-| **Delayed Fitness and Rank Ascent** | `scripts/Future_repro_rank_v1.4.8_noDS_no_mi_death_accounted_pub_ready.R` | Longitudinal models testing delayed siring success (t+1 to t+4) and rank ascent, including model comparisons; generates Figure 3 & 4 panels. |
-| **Observability Sensitivity Analysis** | `scripts/Future_repro_rank_v1.4.5.2_brm_multiple_mi_death_accounted_pub_ready.R` | Multiple-imputation models evaluating robustness of delayed fitness associations accounting for variation in male observability. |
+| **Immediate Reproductive Output** | `Male_annual_fitness_SSB_v1.2_publication_ready.R` | Multivariate GLMM assessing annual associations between SSB, DSB, and offspring sired; outputs parameter summaries and Figure 1 panels. |
+| **Dominance Rank Associations** | `Multivariate_Rank_SSB_DSB_v1.2_publication_ready.R` | Multivariate model evaluating age trajectories for SSB, DSB and dominance rank; generates Figure 2 panels. |
+| **Affiliative Male-Male Bonds** | `Social_network_analysis_publication_ready_v1.2.R` | BISoN edge-weight models and nodal regressions for grooming, coalition, and aggression networks; outputs network metrics and Figure 3a panel. |
+| **Delayed Fitness and Rank Ascent** | `Future_repro_rank_v1.4.8_noDS_no_mi_death_accounted_pub_ready.R` | Longitudinal models testing delayed siring success (t+1 to t+4) and rank ascent, including model comparisons; generates Figure 3 & 4 panels. |
+| **Observability Sensitivity Analysis** | `Future_repro_rank_v1.4.5.2_brm_multiple_mi_death_accounted_pub_ready.R` | Multiple-imputation models evaluating robustness of delayed fitness associations accounting for variation in male observability. |
 
 ### Computational Execution Notes
 * **Fitting models from scratch:** Full Bayesian mixed-effects models require substantial computational time (several hours depending on processor speed and allocated CPU cores).
