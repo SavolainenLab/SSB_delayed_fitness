@@ -19,7 +19,7 @@ library(pdftools)
 
 #Read in data
 # File path (Local working path; convert to relative path prior to final archive)
-supp_data_path <- "/Users/pn26026/Library/CloudStorage/OneDrive-UniversityofBristol/SSB/Data/Supplementary_Tables_Collated_v1.4.xlsx"
+supp_data_path <- "/SSB_delayed_fitness/Supplementary_Tables_Collated_v1.4.xlsx"
 
 # Sheet 19: Combined cleaned collapsed data with observation effort
 # Sheet 20: Cleaned pedigree data
