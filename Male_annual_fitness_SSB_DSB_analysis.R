@@ -20,8 +20,8 @@ library(cowplot)
 # File path (Local working path; convert to relative path prior to final archive)
 supp_data_path <- "/SSB_delayed_fitness/Supplementary_Tables_Collated_v1.4.xlsx"
 
-# Sheet 18: Combined cleaned collapsed data with observation effort
-# Sheet 19: Cleaned pedigree data
+# Sheet 19: Combined cleaned collapsed data with observation effort
+# Sheet 20: Cleaned pedigree data
 data <- readxl::read_excel(path = supp_data_path, sheet = 19)
 pedigree_pre <- readxl::read_excel(path = supp_data_path, sheet = 20)
 
