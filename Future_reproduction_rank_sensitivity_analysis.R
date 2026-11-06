@@ -132,8 +132,8 @@ biv_SSB_DSB <- brm(
 )
 
 #Save model object
-saveRDS(biv_SSB_DSB, file = "/SSB_delayed_fitness/SSB_DSB_biv_mod.rds")
-biv_SSB_DSB <- readRDS(file = "/SSB_delayed_fitness/SSB_DSB_biv_mod.rds")
+#saveRDS(biv_SSB_DSB, file = "/SSB_delayed_fitness/SSB_DSB_biv_mod.rds")
+#biv_SSB_DSB <- readRDS(file = "/SSB_delayed_fitness/SSB_DSB_biv_mod.rds")
 
 summary(biv_SSB_DSB)
 
