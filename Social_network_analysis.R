@@ -27,18 +27,18 @@ results_dir <- file.path(base_dir, "Social_network_results")
 
 if(!dir.exists(results_dir)) dir.create(results_dir)
 
-master_dyad_df <- readxl::read_excel(path = "/SSB_delayed_fitness/Supplementary_Tables_Collated_v1.4.xlsx", sheet = 18)
+master_dyad_df <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 18)
 
 # ==============================================================================
 # 2. FILTERING & PRE-PROCESSING
 # ==============================================================================
 # min_scan_threshold used is >= 10
 
-indiv_observability <- readxl::read_excel(path = "/Users/pn26026/Library/CloudStorage/OneDrive-UniversityofBristol/SSB/Data/Supplementary_Tables_Collated_v1.4.xlsx", sheet = 21)
+indiv_observability <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 21)
 
-valid_monkeys <- readxl::read_excel(path = "/Users/pn26026/Library/CloudStorage/OneDrive-UniversityofBristol/SSB/Data/Supplementary_Tables_Collated_v1.4.xlsx", sheet = 22)
+valid_monkeys <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 22)
 
-group_membership <- readxl::read_excel(path = "/Users/pn26026/Library/CloudStorage/OneDrive-UniversityofBristol/SSB/Data/Supplementary_Tables_Collated_v1.4.xlsx", sheet = 23)
+group_membership <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 23)
 
 directed_interactions_long <- bind_rows(
   master_dyad_df %>%
