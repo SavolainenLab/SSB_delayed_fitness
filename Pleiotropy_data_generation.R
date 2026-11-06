@@ -13,7 +13,7 @@ library(lubridate)
 
 cat("--- INGESTING PRE-ANONYMISED SUPPLEMENTARY DATASETS ---\n")
 
-supp_path <- "/SSB_delayed_fitness/Supplementary_Tables_Collated_v1.4.xlsx"
+supp_path <- "/SSB_delayed_fitness/Data/Raw_inputs/Supplementary_Tables_Collated_v1.4.xlsx"
 output_dir <- "/SSB_delayed_fitness"
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
