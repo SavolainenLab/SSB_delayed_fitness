@@ -10,7 +10,7 @@ library(patchwork)
 #Read in data
 base_dir <- "/SSB_delayed_fitness/"
 
-master_dyad_df <- readxl::read_excel(path = "/SSB_delayed_fitness/Supplementary_Tables_Collated_v1.4.xlsx", sheet = 18)
+master_dyad_df <- readxl::read_excel(path = file.path(base_dire, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 18)
 
 # ------------------------------------------------------------------------------
 # 1. Sparsity & Dyad Overview ####
