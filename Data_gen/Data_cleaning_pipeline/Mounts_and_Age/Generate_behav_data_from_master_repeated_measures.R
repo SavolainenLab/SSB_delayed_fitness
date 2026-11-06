@@ -13,7 +13,7 @@ library(tidyverse)
 library(openxlsx)
 
 # --- Repository paths ---
-repo_root <- "/Users/pn26026/OneDrive - University of Bristol/SSB/Code/Github_upload_v1.1/Data_gen"
+repo_root <- "/SSB_delayed_fitness/Data_gen"
 supp_xlsx <- file.path(repo_root, "Data/Raw_inputs/Supplementary_Tables_Collated_v1.4.xlsx")
 out_dir   <- file.path(repo_root, "Data/Cleaned_outputs")
 if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
