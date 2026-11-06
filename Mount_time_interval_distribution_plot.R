@@ -14,7 +14,7 @@ library(patchwork)
 # ------------------------------------------------------------------------------
 # 0. Repository Paths
 # ------------------------------------------------------------------------------
-repo_root    <- "/Users/pn26026/OneDrive - University of Bristol/SSB/Code/Github_upload_v1.1/"
+repo_root    <- "/SSB_delayed_fitness/"
 supp_xlsx    <- file.path(repo_root, "Data_gen/Data/Raw_inputs/Supplementary_Tables_Collated_v1.4.xlsx")
 plot_out_pdf <- file.path(repo_root, "Mount_time_diff_panel_plot.pdf")
 
