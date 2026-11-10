@@ -22,23 +22,23 @@ library(ggplot2)
 library(cowplot)
 
 plan(multisession, workers = 10)
-base_dir <- "/SSB_delayed_fitness/"
+base_dir <- "SSB_delayed_fitness"
 results_dir <- file.path(base_dir, "Social_network_results")
 
 if(!dir.exists(results_dir)) dir.create(results_dir)
 
-master_dyad_df <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 18)
+master_dyad_df <- readxl::read_excel(path = file.path(base_dir, "Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 18)
 
 # ==============================================================================
 # 2. FILTERING & PRE-PROCESSING
 # ==============================================================================
 # min_scan_threshold used is >= 10
 
-indiv_observability <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 21)
+indiv_observability <- readxl::read_excel(path = file.path(base_dir, "Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 21)
 
-valid_monkeys <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 22)
+valid_monkeys <- readxl::read_excel(path = file.path(base_dir, "Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 22)
 
-group_membership <- readxl::read_excel(path = file.path(base_dir, "/Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 23)
+group_membership <- readxl::read_excel(path = file.path(base_dir, "Supplementary_Tables_Collated_v1.4.xlsx"), sheet = 23)
 
 directed_interactions_long <- bind_rows(
   master_dyad_df %>%
@@ -338,7 +338,7 @@ sink()
 # 1. Configuration & Directories
 # ------------------------------------------------------------------------------
 # Output directory for saved figure RDS files
-output_plots_dir <- "/SSB_delayed_fitness/"
+output_plots_dir <- base_dir
 if (!dir.exists(output_plots_dir)) dir.create(output_plots_dir, recursive = TRUE)
 
 # Color for SSB trajectory draws (consistent with earlier SSB panels)
@@ -456,7 +456,7 @@ cat(sprintf("\nUnlabelled Panel A spaghetti plot saved successfully to:\n%s\n", 
 
 # Interactive session preview
 print(p_spaghetti)
-ggsave(filename = "/SSB_delayed_fitness/panel_a_ssb_grooming_strength.pdf", plot = p_spaghetti, height = 4, width = 4)
+ggsave(filename = file.path(output_plots_dir, "panel_a_ssb_grooming_strength.pdf"), plot = p_spaghetti, height = 4, width = 4)
 
 # Create 4-panel plot for Fig. 3
 # ==============================================================================
@@ -465,62 +465,237 @@ ggsave(filename = "/SSB_delayed_fitness/panel_a_ssb_grooming_strength.pdf", plot
 library(ggplot2)
 library(cowplot)
 
-# ------------------------------------------------------------------------------
-# 1. File Paths & Sizing Configuration
-# ------------------------------------------------------------------------------
-code_dir <- "/SSB_delayed_fitness/"
+path_a <- file.path(output_plots_dir, "panel_a_ssb_grooming_strength.rds")
+path_b <- file.path(output_plots_dir, "future_rank.rds")
+path_c <- file.path(output_plots_dir, "future_rank_DSB_plus1.rds")
+path_d <- file.path(output_plots_dir, "future_rank_DSB_plus2.rds")
 
-# Paths to the 4 saved RDS plots in desired grid order:
-# Top Row:    [A] SSB vs Grooming     | [B] Future Rank (+1 SSB)
-# Bottom Row: [C] Future Rank (+1 DSB)| [D] Future Rank (+2 DSB)
-path_a <- file.path(code_dir, "panel_a_ssb_grooming_strength.rds")
-path_b <- file.path(code_dir, "future_rank.rds")
-path_c <- file.path(code_dir, "future_rank_DSB_plus1.rds")
-path_d <- file.path(code_dir, "future_rank_DSB_plus2.rds")
+# Assemble only if prerequisite panels are present
+if (all(file.exists(c(path_a, path_b, path_c, path_d)))) {
+  panel_a <- readRDS(path_a)
+  panel_b <- readRDS(path_b)
+  panel_c <- readRDS(path_c)
+  panel_d <- readRDS(path_d)
+  
+  four_panel_plot <- cowplot::plot_grid(
+    panel_a, panel_b, panel_c, panel_d,
+    nrow = 2, ncol = 2, labels = c("A", "B", "C", "D"),
+    label_size = 28, label_fontface = "bold", align = "hv", axis = "tblr"
+  )
+  
+  ggsave(filename = file.path(output_plots_dir, "Four_Panel_SSB_Rank_Composite.pdf"),
+         plot = four_panel_plot, width = 8, height = 8, device = "pdf")
+} else {
+  cat("\nNote: Skipping 4-panel composite. Requires pre-generated panels B, C, and D.\n")
+}
 
-# Global label settings (tune here to scale all tags simultaneously)
-label_sz   <- 28        # Panel letter size (e.g., 24, 28, 32)
-label_face <- "bold"
+# ==============================================================================
+# 10. SUPPLEMENTARY MOUNTING NETWORK PLOTS (WEIGHTED & OBSERVED EVENTS)
+# ==============================================================================
+library(tidygraph)
+library(ggraph)
 
 # ------------------------------------------------------------------------------
-# 2. Read in the Modular .rds Files
+# 1. Reconstruct Input Dataframes (bison_ready_df_list) from In-Memory Objects
 # ------------------------------------------------------------------------------
-cat("Loading panel RDS files...\n")
-panel_a <- readRDS(path_a)
-panel_b <- readRDS(path_b)
-panel_c <- readRDS(path_c)
-panel_d <- readRDS(path_d)
+bison_ready_df_list <- list()
+
+for (yr in years) {
+  for (grp in groups) {
+    for (beh in behaviors) {
+      model_key <- paste(yr, grp, beh, sep = "_")
+      if (!(model_key %in% names(bison_modfit_list))) next
+      
+      valid_males <- group_membership %>%
+        filter(Year == yr, Group == grp) %>%
+        pull(ID) %>%
+        sort()
+      
+      is_directed <- ifelse(beh == "Coalition", FALSE, TRUE)
+      
+      full_grid <- expand.grid(node_1_id = valid_males, node_2_id = valid_males, stringsAsFactors = FALSE) %>%
+        mutate(Year = yr)
+      
+      if (is_directed) {
+        full_grid <- full_grid %>% filter(node_1_id != node_2_id)
+      } else {
+        full_grid <- full_grid %>% filter(node_1_id < node_2_id)
+      }
+      
+      bison_ready_df_list[[model_key]] <- full_grid %>%
+        left_join(directed_interactions_long, by = c("Year", "node_1_id", "node_2_id")) %>%
+        mutate(
+          event        = replace_na(.data[[beh]], 0),
+          Shared_Scans = replace_na(Shared_Scans, 0)
+        ) %>%
+        left_join(indiv_observability, by = c("Year", "node_1_id" = "Individual_ID")) %>%
+        rename(Total_Scans_Sender = Total_Indiv_Scans) %>%
+        left_join(indiv_observability, by = c("Year", "node_2_id" = "Individual_ID")) %>%
+        rename(Total_Scans_Receiver = Total_Indiv_Scans) %>%
+        mutate(
+          Total_Scans_Sender   = replace_na(Total_Scans_Sender, 0),
+          Total_Scans_Receiver = replace_na(Total_Scans_Receiver, 0),
+          duration             = Total_Scans_Sender + Total_Scans_Receiver - Shared_Scans
+        ) %>%
+        dplyr::select(node_1_id, node_2_id, event, duration)
+    }
+  }
+}
 
 # ------------------------------------------------------------------------------
-# 3. Assemble 2x2 Composite Grid
+# 2. Define Network Plotting Function (Using In-Memory bison_modfit_list)
 # ------------------------------------------------------------------------------
-four_panel_plot <- cowplot::plot_grid(
-  panel_a, panel_b,
-  panel_c, panel_d,
-  nrow           = 2,
-  ncol           = 2,
-  labels         = c("A", "B", "C", "D"),
-  label_size     = label_sz,
-  label_fontface = label_face,
-  align          = "hv",   # Perfectly aligns axes across rows and columns
-  axis           = "tblr"  # Synchronizes top, bottom, left, right margins
+plot_macaque_network <- function(keys, 
+                                 weight_threshold = 0, 
+                                 filter_by_event = FALSE,
+                                 suffix = "") {
+  
+  plots_out <- list()
+  edges_out <- list()
+  
+  for (m_key in keys) {
+    
+    # 1. DATA EXTRACTION
+    model_obj <- bison_modfit_list[[m_key]]
+    input_df  <- bison_ready_df_list[[m_key]]
+    
+    network_metrics <- tryCatch({
+      edge_draws_log <- extract_metric(model_obj, "edge_weight")
+      edge_draws     <- exp(edge_draws_log)
+      mean_w         <- apply(edge_draws, 2, mean)
+      data.frame(Mean_Weight = mean_w)
+    }, error = function(e) { NULL })
+    
+    if (is.null(network_metrics)) next
+    
+    # 2. FILTERING LOGIC
+    plot_df <- input_df %>%
+      bind_cols(network_metrics) %>%
+      mutate(Model_Key = m_key)
+    
+    if (weight_threshold > 0) plot_df <- plot_df %>% filter(Mean_Weight > weight_threshold)
+    if (filter_by_event) plot_df <- plot_df %>% filter(event > 0)
+    
+    if (nrow(plot_df) == 0) {
+      cat("Skipping", m_key, "- empty after filters.\n")
+      next
+    }
+    
+    # 3. NETWORK ASSEMBLY
+    net_graph <- as_tbl_graph(plot_df, directed = TRUE)
+    
+    # 4. PLOTTING
+    title_elements <- strsplit(m_key, "_")[[1]]
+    filter_label <- ifelse(filter_by_event, " (Observed Events)", " (Model Weights)")
+    plot_title <- paste0("Mounting: ", title_elements[2], " ", title_elements[1], filter_label)
+    
+    scale_bar_title <- ifelse(filter_by_event, "Observed Rate", "Mean Edge Weight")
+    
+    p <- ggraph(net_graph, layout = "fr", weights = NA) +
+      geom_edge_fan(aes(width = Mean_Weight, alpha = Mean_Weight), 
+                    color = "#005599",
+                    arrow = arrow(length = unit(1.8, 'mm'), type = "closed"), 
+                    start_cap = circle(2.5, 'mm'), 
+                    end_cap = circle(4.5, 'mm')) +
+      scale_edge_width(range = c(0.2, 2.5), 
+                       name = scale_bar_title,
+                       guide = guide_legend(title.position = "top", title.hjust = 0.5)) + 
+      scale_edge_alpha(range = c(0.2, 1), 
+                       name = scale_bar_title,
+                       guide = guide_legend(title.position = "top", title.hjust = 0.5)) +
+      geom_node_point(size = 2.5, color = "white", fill = "goldenrod", 
+                      shape = 21, stroke = 1.5, alpha = 0.9) +
+      geom_node_text(aes(label = name), repel = TRUE, size = 3, fontface = "bold", 
+                     point.padding = unit(0.5, "lines")) +
+      scale_x_continuous(expand = expansion(mult = 0.2)) +
+      scale_y_continuous(expand = expansion(mult = 0.2)) +
+      theme_void() +
+      theme(
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 10),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 8, face = "bold"),
+        legend.text = element_text(size = 7),
+        legend.key.width = unit(1, "cm")
+      ) +
+      labs(title = plot_title)
+    
+    final_key <- paste0(m_key, suffix)
+    plots_out[[final_key]] <- p
+    edges_out[[final_key]] <- plot_df
+  }
+  
+  return(list(plots = plots_out, edgelists = edges_out))
+}
+
+# ------------------------------------------------------------------------------
+# 3. Generate Both Filtering Types & Multipanel Grids
+# ------------------------------------------------------------------------------
+mount_keys  <- grep("_Mounting$", names(bison_modfit_list), value = TRUE)
+target_keys <- mount_keys[!grepl("2024_V", mount_keys)]
+
+# TYPE A: Model-Weighted Analysis (Posterior Mean > 0.002, excluding 2024_V)
+results_weight <- plot_macaque_network(
+  keys             = target_keys, 
+  weight_threshold = 0.002,
+  filter_by_event  = FALSE,
+  suffix           = "_weight"
 )
 
-# ------------------------------------------------------------------------------
-# 4. Preview & Export
-# ------------------------------------------------------------------------------
-# View in RStudio Plots pane
-print(four_panel_plot)
+grid_weight <- plot_grid(
+  plotlist   = results_weight$plots, 
+  ncol       = 2, 
+  labels     = "AUTO", 
+  label_size = 12, 
+  align      = "hv", 
+  axis       = "tblr"
+)
 
-# Export publication-quality PDF & PNG
-output_pdf <- file.path(code_dir, "Four_Panel_SSB_Rank_Composite.pdf")
+title_weight <- ggdraw() + 
+  draw_label("Macaque Mounting Networks: Model-Weighted Analysis \n(Minimum edge weight threshold of 0.002 for edge to be displayed)", 
+             fontface = 'bold', x = 0.5, hjust = 0.5, size = 14)
 
-# PDF export (vector graphics)
+final_output_weight <- plot_grid(title_weight, grid_weight, ncol = 1, rel_heights = c(0.1, 1))
+
+# TYPE B: Observed-Event Analysis (event > 0 across all mounting networks)
+results_event <- plot_macaque_network(
+  keys             = mount_keys, 
+  weight_threshold = 0, 
+  filter_by_event  = TRUE,
+  suffix           = "_event"
+)
+
+grid_event <- plot_grid(
+  plotlist   = results_event$plots, 
+  ncol       = 2, 
+  labels     = "AUTO", 
+  label_size = 12, 
+  align      = "hv", 
+  axis       = "tblr"
+)
+
+title_event <- ggdraw() + 
+  draw_label("Macaque Mounting Networks: Observed Mounting Events", 
+             fontface = 'bold', x = 0.5, hjust = 0.5, size = 14)
+
+final_output_event <- plot_grid(title_event, grid_event, ncol = 1, rel_heights = c(0.1, 1))
+
+# ------------------------------------------------------------------------------
+# 4. Display & Save Supplementary Network Plots
+# ------------------------------------------------------------------------------
+print(final_output_weight)
+print(final_output_event)
+
 ggsave(
-  filename = output_pdf,
-  plot     = four_panel_plot,
-  width    = 8,
-  height   = 8,
-  units    = "in",
-  device   = "pdf"
+  filename = file.path(output_plots_dir, "Mounting_network_Weighted_Panel_0.002.pdf"),
+  plot     = final_output_weight,
+  width    = 10,
+  height   = 20
+)
+
+ggsave(
+  filename = file.path(output_plots_dir, "Mounting_Events_Panel.pdf"),
+  plot     = final_output_event,
+  width    = 10,
+  height   = 20
 )
