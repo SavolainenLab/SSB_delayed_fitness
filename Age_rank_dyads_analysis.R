@@ -248,22 +248,6 @@ bg_nodes_all <- c(master_dyad_df$ID1, master_dyad_df$ID2)
 cat(sprintf("\nTotal unique males across all 5,944 dyads: %d\n", length(unique(bg_nodes_all))))
 
 # ==============================================================================
-# VIF Diagnostic Check for Dyadic GLMM Predictors ####
-# ==============================================================================
-library(car)
-
-# Fit a fixed-effects logistic regression on the identical dyadic dataframe
-vif_glm <- glm(
-  SSB_Binary ~ abs_Age_Diff + abs_Rank_Diff + mean_Age + mean_Rank + log_scans,
-  data   = glmm_df,
-  family = binomial(link = "logit")
-)
-
-# Calculate VIF scores
-vif_scores <- car::vif(vif_glm)
-print(round(vif_scores, 2))
-
-# ==============================================================================
 # Dyadic Logistic GLMM: Partner Choice (Age & Rank Disparity)
 # Incorporating SRI, Observability Filtering, Offset, and Dyad Random Effect
 # ==============================================================================
@@ -335,6 +319,23 @@ cat(sprintf("Dyads remaining after scan filtering (>= %d scans): %d\n",
 cat(sprintf("Active SSB dyads in filtered dataset: %d (%.2f%%)\n", 
             sum(glmm_refined_df$SSB_Binary), 
             mean(glmm_refined_df$SSB_Binary) * 100))
+
+# ==============================================================================
+# VIF Diagnostic Check for Dyadic GLMM Predictors ####
+# ==============================================================================
+library(car)
+
+# Fit a fixed-effects logistic regression matching the GLMM fixed effects
+vif_glm <- glm(
+  SSB_Binary ~ abs_age_diff_s + abs_rank_diff_s + mean_age_s + mean_rank_s +
+    SRI_s + offset(log_dyadic_effort),
+  data   = glmm_refined_df,
+  family = binomial(link = "logit")
+)
+
+# Calculate VIF scores
+vif_scores <- car::vif(vif_glm)
+print(round(vif_scores, 2))
 
 # ------------------------------------------------------------------------------
 # 3. Model Formula Definition
