@@ -39,8 +39,7 @@ The analytical pipeline runs in **R (version >= 4.4.2)**. An active C++ compiler
 Clone the repository to your local computer:
 
 ```bash
-git clone [https://github.com/SavolainenLab/SSB_delayed_fitness.git](https://github.com/SavolainenLab/SSB_delayed_fitness.git)
-cd SSB_delayed_fitness
+git clone https://github.com/SavolainenLab/SSB_delayed_fitness.git && cd SSB_delayed_fitness
 ```
 
 ### Installing Package Dependencies
