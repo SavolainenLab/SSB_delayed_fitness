@@ -67,6 +67,8 @@ remotes::install_github("robayed/bisonR")
 
 ## 3. Instructions for Use
 
+> **Note:** Open `SSB_delayed_fitness.Rproj` in RStudio before running any scripts so that the working directory is automatically set to the repository root.
+
 ### Data Organisation
 The primary data source is the collated supplementary workbook:
 - `Supplementary_Tables.xlsx`: Contains all supplementary tables referenced in the main text. Table descriptions are provided in the sheet `'Table Index'`.
@@ -91,11 +93,7 @@ The script collates all modular outputs, resolves social group assignments, comp
 - `Dyadic_counts.csv` (Within-group dyadic behavioral and attribute dataset)
 
 ### Running the Analysis
-1. Open the repository directory in R or RStudio, or set your working directory to the project root:
-
-```R
-setwd("path/to/SSB_delayed_fitness")
-```
+1. Ensure `SSB_delayed_fitness.Rproj` is open in RStudio (or run `setwd("path/to/SSB_delayed_fitness")` if executing from a standalone R terminal).
 
 2. Execute the self-contained R scripts corresponding to each section of the manuscript:
 
