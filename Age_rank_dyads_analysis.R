@@ -580,5 +580,5 @@ supp_table_dyadic <- param_order %>%
 print(as.data.frame(supp_table_dyadic))
 
 # Export to CSV
-output_path <- file.path(base.dir, "Supp_Table_Dyadic_age_rank_GLMM.csv")
+output_path <- file.path(base_dir, "Supp_Table_Dyadic_age_rank_GLMM.csv")
 write_csv(supp_table_dyadic, output_path)
