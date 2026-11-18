@@ -787,8 +787,8 @@ extract_mi_model_data <- function(model_name, file_name, response_type) {
   # ----------------------------------------------------------------------------
   # Extract overall parameter stabilities
   rhats <- brms::rhat(mdl)
-  bulks <- brms::ess_bulk(mdl)
-  tails <- brms::ess_tail(mdl)
+  bulks <- posterior::ess_bulk(mdl)
+  tails <- posterior::ess_tail(mdl)
   
   # Extract Divergent transitions per imputation chain
   np <- brms::nuts_params(mdl)
