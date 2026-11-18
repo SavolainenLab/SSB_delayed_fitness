@@ -867,7 +867,7 @@ for (ff in future_files) {
         dplyr::select(Model_Name, Response_Variable, Effect_Type, Group, Parameter, Estimate, Est.Error, Lower_95_CI, Upper_95_CI)
       
       # B: Diagnostics
-      rhats <- brms::rhat(mdl); bulks <- brms::ess_bulk(mdl); tails <- brms::ess_tail(mdl)
+      rhats <- brms::rhat(mdl); bulks <- posterior::ess_bulk(mdl); tails <- posterior::ess_tail(mdl)
       np <- brms::nuts_params(mdl)
       div_df <- np %>% dplyr::filter(Parameter == "divergent__") %>% dplyr::group_by(Chain) %>% dplyr::summarise(Divergences = sum(Value), .groups = "drop")
       
